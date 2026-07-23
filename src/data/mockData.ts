@@ -16,6 +16,7 @@ import {
   NavigationItem,
   WorkPaperItem,
   CalculationDetail,
+  AccountMapping,
 } from '../types';
 
 export const organizations: Organization[] = [
@@ -452,6 +453,23 @@ export const calculationDetails: CalculationDetail[] = [
     ],
     explanation: '计算非全资子公司中归属于外部少数股东的权益部分，子公司A持股80%、子公司B持股70%，剩余部分为少数股东权益。',
   },
+];
+
+export const accountMappings: AccountMapping[] = [
+  { id: 1, parent_account_id: 2, parent_account_code: '1001', parent_account_name: '库存现金', org_id: 2, org_name: '子公司A', subsidiary_account_code: '1001', subsidiary_account_name: '库存现金', mapping_type: 'direct', status: 'active', effective_date: '2026-01-01' },
+  { id: 2, parent_account_id: 3, parent_account_code: '1002', parent_account_name: '银行存款', org_id: 2, org_name: '子公司A', subsidiary_account_code: '1002', subsidiary_account_name: '银行存款', mapping_type: 'direct', status: 'active', effective_date: '2026-01-01' },
+  { id: 3, parent_account_id: 3, parent_account_code: '1002', parent_account_name: '银行存款', org_id: 2, org_name: '子公司A', subsidiary_account_code: '100201', subsidiary_account_name: '基本存款账户', mapping_type: 'split', status: 'active', effective_date: '2026-01-01' },
+  { id: 4, parent_account_id: 3, parent_account_code: '1002', parent_account_name: '银行存款', org_id: 2, org_name: '子公司A', subsidiary_account_code: '100202', subsidiary_account_name: '一般存款账户', mapping_type: 'split', status: 'active', effective_date: '2026-01-01' },
+  { id: 5, parent_account_id: 10, parent_account_code: '1122', parent_account_name: '应收账款', org_id: 3, org_name: '子公司B', subsidiary_account_code: '1122', subsidiary_account_name: '应收款', mapping_type: 'direct', status: 'active', effective_date: '2026-01-01' },
+  { id: 6, parent_account_id: 16, parent_account_code: '1405', parent_account_name: '库存商品', org_id: 3, org_name: '子公司B', subsidiary_account_code: '1403', subsidiary_account_name: '原材料', mapping_type: 'summary', status: 'active', effective_date: '2026-01-01' },
+  { id: 7, parent_account_id: 16, parent_account_code: '1405', parent_account_name: '库存商品', org_id: 3, org_name: '子公司B', subsidiary_account_code: '1405', subsidiary_account_name: '库存商品', mapping_type: 'summary', status: 'active', effective_date: '2026-01-01' },
+  { id: 8, parent_account_id: 18, parent_account_code: '1601', parent_account_name: '固定资产', org_id: 4, org_name: '子公司C', subsidiary_account_code: '1501', subsidiary_account_name: '固定资产原值', mapping_type: 'direct', status: 'active', effective_date: '2026-01-01' },
+  { id: 9, parent_account_id: 19, parent_account_code: '1602', parent_account_name: '累计折旧', org_id: 4, org_name: '子公司C', subsidiary_account_code: '1502', subsidiary_account_name: '累计折旧', mapping_type: 'direct', status: 'active', effective_date: '2026-01-01' },
+  { id: 10, parent_account_id: 22, parent_account_code: '2001', parent_account_name: '短期借款', org_id: 2, org_name: '子公司A', subsidiary_account_code: '2001', subsidiary_account_name: '短期贷款', mapping_type: 'direct', status: 'active', effective_date: '2026-01-01' },
+  { id: 11, parent_account_id: 24, parent_account_code: '2202', parent_account_name: '应付账款', org_id: 3, org_name: '子公司B', subsidiary_account_code: '2202', subsidiary_account_name: '应付款', mapping_type: 'direct', status: 'active', effective_date: '2026-01-01' },
+  { id: 12, parent_account_id: 32, parent_account_code: '3001', parent_account_name: '实收资本', org_id: 2, org_name: '子公司A', subsidiary_account_code: '3001', subsidiary_account_name: '股本', mapping_type: 'direct', status: 'active', effective_date: '2026-01-01' },
+  { id: 13, parent_account_id: 38, parent_account_code: '6001', parent_account_name: '主营业务收入', org_id: 4, org_name: '子公司C', subsidiary_account_code: '6001', subsidiary_account_name: '销售收入', mapping_type: 'direct', status: 'active', effective_date: '2026-01-01' },
+  { id: 14, parent_account_id: 41, parent_account_code: '6401', parent_account_name: '主营业务成本', org_id: 4, org_name: '子公司C', subsidiary_account_code: '6401', subsidiary_account_name: '销售成本', mapping_type: 'direct', status: 'active', effective_date: '2026-01-01' },
 ];
 
 export const trendData = {

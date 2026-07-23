@@ -242,3 +242,17 @@ export interface CalculationDetail {
   }[];
   explanation: string;
 }
+
+export interface AccountMapping {
+  id: number;
+  parent_account_id: number;
+  parent_account_code: string;
+  parent_account_name: string;
+  org_id: number;
+  org_name: string;
+  subsidiary_account_code: string;
+  subsidiary_account_name: string;
+  mapping_type: 'direct' | 'summary' | 'split';
+  status: 'active' | 'inactive';
+  effective_date: string;
+}

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Plus, Edit, Trash2, Search, ChevronDown, ChevronRight, FileText, Download, Upload, Settings, MoreHorizontal, Check, X } from 'lucide-react';
-import { accounts } from '../data/mockData';
-import type { Account } from '../types';
+import { Plus, Edit, Trash2, Search, ChevronDown, ChevronRight, FileText, Download, Upload, Settings, MoreHorizontal, Check, X, RefreshCw } from 'lucide-react';
+import { accounts, accountMappings, organizations } from '../data/mockData';
+import type { Account, AccountMapping } from '../types';
 
 export default function AccountManage() {
+  const [mainTab, setMainTab] = useState<string>('system');
   const [activeTab, setActiveTab] = useState<string>('asset');
   const [searchTerm, setSearchTerm] = useState('');
   const [showInactive, setShowInactive] = useState(false);
@@ -11,6 +12,8 @@ export default function AccountManage() {
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<number[]>([1, 21, 31, 36, 37]);
+  const [mappingSearchTerm, setMappingSearchTerm] = useState('');
+  const [selectedOrgFilter, setSelectedOrgFilter] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     code: '',
     name: '',
@@ -137,6 +140,44 @@ export default function AccountManage() {
 
   let rowIndex = 0;
 
+  const getMappingTypeLabel = (type: AccountMapping['mapping_type']) => {
+    const labels: Record<string, string> = {
+      direct: '直接映射',
+      summary: '汇总映射',
+      split: '拆分映射'
+    };
+    return labels[type] || type;
+  };
+
+  const getMappingTypeColor = (type: AccountMapping['mapping_type']) => {
+    const colors: Record<string, string> = {
+      direct: 'bg-green-100 text-green-700',
+      summary: 'bg-blue-100 text-blue-700',
+      split: 'bg-purple-100 text-purple-700'
+    };
+    return colors[type] || 'bg-gray-100 text-gray-700';
+  };
+
+  const getStatusLabel = (status: AccountMapping['status']) => {
+    return status === 'active' ? '启用' : '停用';
+  };
+
+  const getStatusColor = (status: AccountMapping['status']) => {
+    return status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700';
+  };
+
+  const flattenedOrgs = organizations.flat(3).filter(o => !o.is_consolidation);
+
+  const filteredMappings = accountMappings.filter(mapping => {
+    const matchOrg = !selectedOrgFilter || mapping.org_id === selectedOrgFilter;
+    const matchSearch = mapping.parent_account_code.toLowerCase().includes(mappingSearchTerm.toLowerCase()) ||
+                        mapping.parent_account_name.toLowerCase().includes(mappingSearchTerm.toLowerCase()) ||
+                        mapping.subsidiary_account_code.toLowerCase().includes(mappingSearchTerm.toLowerCase()) ||
+                        mapping.subsidiary_account_name.toLowerCase().includes(mappingSearchTerm.toLowerCase()) ||
+                        mapping.org_name.toLowerCase().includes(mappingSearchTerm.toLowerCase());
+    return matchOrg && matchSearch;
+  });
+
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
@@ -149,34 +190,62 @@ export default function AccountManage() {
       <div className="bg-white rounded-xl border border-gray-200">
         <div className="border-b border-gray-200">
           <div className="flex items-center">
-            {tabs.map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className={`px-6 py-3 text-sm font-medium transition-colors ${
-                  activeTab === tab.key
-                    ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+            <button
+              onClick={() => setMainTab('system')}
+              className={`px-6 py-3 text-sm font-medium transition-colors ${
+                mainTab === 'system'
+                  ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
+            >
+              集团科目
+            </button>
+            <button
+              onClick={() => setMainTab('mapping')}
+              className={`px-6 py-3 text-sm font-medium transition-colors ${
+                mainTab === 'mapping'
+                  ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
+            >
+              科目映射
+            </button>
             <div className="flex-1"></div>
-            <div className="flex items-center gap-2 px-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="输入编码/名称/助记码/状态等关键字搜索"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
           </div>
         </div>
+
+        {mainTab === 'system' && (
+          <>
+            <div className="border-b border-gray-200">
+              <div className="flex items-center">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.key}
+                    onClick={() => setActiveTab(tab.key)}
+                    className={`px-6 py-3 text-sm font-medium transition-colors ${
+                      activeTab === tab.key
+                        ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+                <div className="flex-1"></div>
+                <div className="flex items-center gap-2 px-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="输入编码/名称/助记码/状态等关键字搜索"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
 
         <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-200">
           <div className="flex items-center gap-2">
@@ -434,6 +503,98 @@ export default function AccountManage() {
             <button className="px-3 py-1 text-sm text-gray-600 bg-gray-100 rounded hover:bg-gray-200">下一页</button>
           </div>
         </div>
+          </>
+        )}
+
+        {mainTab === 'mapping' && (
+          <div className="p-4">
+            <div className="bg-gray-50 rounded-lg p-4 mb-4">
+              <div className="flex items-center gap-4 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium text-gray-700">子公司:</label>
+                  <select
+                    value={selectedOrgFilter || ''}
+                    onChange={(e) => setSelectedOrgFilter(e.target.value ? Number(e.target.value) : null)}
+                    className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">全部子公司</option>
+                    {flattenedOrgs.map((org) => (
+                      <option key={org.id} value={org.id}>{org.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="relative flex-1 max-w-xs">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="搜索科目编码/名称/子公司..."
+                    value={mappingSearchTerm}
+                    onChange={(e) => setMappingSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="border border-gray-200 rounded-lg overflow-hidden">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-gray-50">
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">序号</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">子公司</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">母公司科目编码</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">母公司科目名称</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">子公司科目编码</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">子公司科目名称</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">映射类型</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">生效日期</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">状态</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase">操作</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {filteredMappings.map((mapping, idx) => (
+                    <tr key={mapping.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 text-sm text-gray-600">{idx + 1}</td>
+                      <td className="px-4 py-3 text-sm font-medium text-gray-900">{mapping.org_name}</td>
+                      <td className="px-4 py-3 text-sm font-medium text-blue-600">{mapping.parent_account_code}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900">{mapping.parent_account_name}</td>
+                      <td className="px-4 py-3 text-sm font-medium text-green-600">{mapping.subsidiary_account_code}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900">{mapping.subsidiary_account_name}</td>
+                      <td className="px-4 py-3">
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getMappingTypeColor(mapping.mapping_type)}`}>
+                          {getMappingTypeLabel(mapping.mapping_type)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{mapping.effective_date}</td>
+                      <td className="px-4 py-3">
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(mapping.status)}`}>
+                          {getStatusLabel(mapping.status)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-center gap-4">
+                          <button className="text-blue-600 hover:text-blue-900 text-sm font-medium">编辑</button>
+                          <button className="text-gray-600 hover:text-gray-900 text-sm font-medium">删除</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200">
+                <p className="text-sm text-gray-600">
+                  共 <span className="font-semibold">{filteredMappings.length}</span> 条记录
+                </p>
+                <div className="flex items-center gap-2">
+                  <button className="px-3 py-1 text-sm text-gray-600 bg-gray-100 rounded hover:bg-gray-200">上一页</button>
+                  <button className="px-3 py-1 text-sm text-blue-600 bg-blue-100 rounded">1</button>
+                  <button className="px-3 py-1 text-sm text-gray-600 bg-gray-100 rounded hover:bg-gray-200">下一页</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {showModal && (
